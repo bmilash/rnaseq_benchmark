@@ -1,0 +1,2 @@
+# converts output from time program into seconds.
+{ split($NF,f,"[ms]"); $NF=60.0*f[1]+f[2]; print }

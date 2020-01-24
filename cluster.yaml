@@ -1,0 +1,10 @@
+# cluster.yaml - cluster configuration for Snakefile.rnaseq
+__default__:
+    cluster: notchpeak
+    partition: notchpeak-guest
+    account: owner-guest
+    time: 30:00
+    ntasks: 1
+
+align_one_sample:
+    ntasks: 4
