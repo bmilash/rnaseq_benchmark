@@ -22,7 +22,7 @@ fi
 
 snakemake -s Snakefile.benchmark \
 	--cluster-config cluster.yaml \
-	--latency-wait 10 \
+	--latency-wait 20 \
 	--cluster "sbatch --clusters={cluster.cluster} --account={cluster.account} --partition={cluster.partition} $reservation --ntasks={cluster.ntasks} --time={cluster.time} -J '{rule}'" \
 	--jobs 20
 
