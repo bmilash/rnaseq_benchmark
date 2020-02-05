@@ -26,11 +26,11 @@ def RequiredModules():
 	Returns list of required module names.
 	"""
 	return [ "samtools/1.5", 
-		"picard/2.1.1", 
 		"multiqc/1.5", 
-		"subread/1.5.3", 
 		"fastqc/0.11.4", 
 		"star/2.7.1a", 
+		"sra-toolkit/2.10.0",
+		"R/3.6.1",
 	]
 
 def LookupFastq(wildcard):
@@ -82,7 +82,7 @@ onstart:
 		print("Pre-flight checks OK!")
 
 rule all_done:
-	input: "differential_expression_analysis.done","raw_sample_qc.done"
+	input: "differential_expression_analysis.done", "summarized_qc.done"
 
 rule download_one_sample:
 	output: "Samples/{srr}_1.fastq", "Samples/{srr}_2.fastq"
@@ -108,7 +108,7 @@ rule index_genome:
 			--genomeFastaFiles {input.fasta} \
 			--sjdbGTFfile {input.gff} \
 			--genomeSAindexNbases 10 \
-			--sjdbOverhang 100) > Benchmarks/Star/index_genome.txt
+			--sjdbOverhang 100) 2>Benchmarks/Star/index_genome.txt
 		"""
 
 rule download_annotation:
@@ -198,14 +198,14 @@ rule differential_expression_analysis:
 		"""
 
 # This rule generates the data quality summary.
-#rule summarized_qc:
-#	input: "raw_sample_qc.done", "all_samples_aligned.done"
-#	output: touch("summarized_qc.done")
-#	message: "Creating sample qc summary."
-#	shell: """
-#		module load multiqc/1.5
-#		time (multiqc .) 2>benchmarks/multiqc/multiqc.txt
-#		"""
+rule summarized_qc:
+	input: "raw_sample_qc.done", "all_samples_aligned.done"
+	output: touch("summarized_qc.done")
+	message: "Creating sample qc summary."
+	shell: """
+		module load multiqc/1.5
+		time (multiqc .) 2>Benchmarks/Multiqc/multiqc.txt
+		"""
 
 # This rule runs FastQC on each sample's fastq file.
 rule qc_one_sample:
@@ -242,4 +242,4 @@ rule raw_sample_qc:
 
 # This rule cleans up the output from all the other rules.
 rule clean:
-	shell: "rm -rf Alignments Samples Genome Benchmarks Log.out FastQC deseq2_plots.pdf project_counts.txt project_results.txt sampledata.txt all_samples_aligned.done raw_sample_qc.done differential_expression_analysis.done"
+	shell: "rm -rf Alignments Samples Genome Benchmarks Log.out FastQC deseq2_plots.pdf project_counts.txt project_results.txt sampledata.txt all_samples_aligned.done raw_sample_qc.done differential_expression_analysis.done summarized_qc.done multiqc_data* multiqc_report*.html"

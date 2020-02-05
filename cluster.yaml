@@ -1,8 +1,8 @@
 # cluster.yaml - cluster configuration for Snakefile.rnaseq
 __default__:
     cluster: notchpeak
-    partition: notchpeak-guest
-    account: owner-guest
+    partition: notchpeak-shared
+    account: chpc
     time: 30:00
     ntasks: 1
 
