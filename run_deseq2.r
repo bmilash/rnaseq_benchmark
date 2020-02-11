@@ -44,9 +44,14 @@ ReadSampleData=function(sample_data_file)
 
 RunAnalysis=function(pdffile="deseq2_plots.pdf")
 {
-	# Read the experiment configuration.
+	# Read the experiment configuration. To do that we need to
+	# identify directory where this script is located.
 	print("Reading experiment configuration.")
-	config=read_yaml("config.yaml")
+	arguments=commandArgs()
+	filearg=grep("--file=",arguments)
+	scriptname=sub("--file=","",arguments[filearg])
+	scriptdir=normalizePath(dirname(scriptname))
+	config=read_yaml(file.path(scriptdir,"config.yaml"))
 	print("Reading count data.")
 	countdata=CountsMatrix()
 	print("Reading sample information.")

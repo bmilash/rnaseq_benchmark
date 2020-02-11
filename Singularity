@@ -51,4 +51,4 @@ snakemake -s /Snakefile.benchmark --configfile $configfile --dag | dot -Tpng > d
 echo "Generating rule graph diagram -> rulegraph.png"
 snakemake -s /Snakefile.benchmark --configfile $configfile --rulegraph | dot -Tpng > rulegraph.png
 echo "Running snakemake with remaining arguments ( $* )."
-snakemake -s /Snakefile.benchmark --configfile $configfile $*
+sh run_workflow.sh --configfile $configfile $*

@@ -1,25 +1,17 @@
 #!/uufs/chpc.utah.edu/sys/installdir/snakemake/5.6.0/bin/snakemake -s
 # Snakefile.benchmark - snakemake snakefile for benchmarking RNAseq workflow.
-# 
-# This workflow assumes the following (for now, for simplicity sake):
-# 	fastq files are gzipped, are named <something>.fastq.gz, and
-#	are in the current directory.
-# 	Single end sequence data.
-# 	Single sequence data file per sample.
-#	Experiment is described in the config.yaml file.
-#	Sample names can be embedded in legal file names (e.g. no spaces,
-#		punctuation, etc).
-# Will eventually remove some of these requirements.
-# Future: support for cluster calls, multithreaded calls.
 
 import os
 import sys
 import subprocess
 
-configfile: "config.yaml"
+# Now specifying config file on command line. This lets us call workflow
+# from other directories, since we have to specify full path of configuration
+# file.
+#configfile: "config.yaml"
 
 # These rules should be executed on the host machine, not on the cluster:
-localrules: all_done, make_sampledata_file, clean, differential_expression_analysis, analysis_complete, raw_sample_qc, align_all_samples
+localrules: all_done, make_sampledata_file, clean, analysis_complete, raw_sample_qc, align_all_samples
 
 def RequiredModules():
 	"""
@@ -33,12 +25,6 @@ def RequiredModules():
 		"R/3.6.1",
 	]
 
-def LookupFastq(wildcard):
-	"""
-	Returns Fastq file for a given sample.
-	"""
-	return config['samples'][wildcard[0]]['filename']
-
 def Samples(config):
 	"""
 	Returns list of sample names from experiment config file.
@@ -51,19 +37,6 @@ def SRRNumbers(config):
 	"""
 	return list(map(lambda x:config['samples'][x]['srrnumber'],Samples(config)))
 
-def FastqFiles(config):
-	"""
-	Returns list of all Fastq files listed in config file.
-	"""
-	samplenames=Samples(config)
-	return list(map(lambda x:config['samples'][x]['filename'],samplenames))
-
-def FastqBasenames(config):
-	"""
-	Returns list of base names of Fastq files minus any extension.
-	"""
-	return list(map(lambda x: os.path.basename(x).split('.')[0], FastqFiles(config)))
-
 # The onstart handler runs code when the workflow starts. Using this to
 # perform "pre-flight checks".
 onstart:
@@ -71,7 +44,7 @@ onstart:
 		# Check for required software modules.
 		shell("module load "+" ".join(RequiredModules()))
 
-		shell("mkdir -p Alignments Samples Benchmarks/Fastqc Benchmarks/Multiqc Benchmarks/r Benchmarks/Samtools Benchmarks/Star Genome")
+		shell("mkdir -p Alignments Samples")
 	except subprocess.CalledProcessError:
 		print("One or more required modules missing.")
 		sys.exit(1)
@@ -86,6 +59,8 @@ rule all_done:
 
 rule download_one_sample:
 	output: "Samples/{srr}_1.fastq", "Samples/{srr}_2.fastq"
+	benchmark:
+		"Benchmarks/download_one_sample/{srr}.tsv"
 	shell:
 		"""
 		module load sra-toolkit/2.10.0
@@ -99,21 +74,25 @@ rule index_genome:
 	input: fasta=config['genome_fasta'], gff=config['gene_annotation_file']
 	output: directory(config['genome_index'])
 	message: "Building genome index {output}."
+	benchmark:
+		"Benchmarks/index_genome/index_genome.tsv"
 	shell: """
 		module load star/2.7.1a
 		mkdir -p {output}
-		time (STAR --runMode genomeGenerate \
+		STAR --runMode genomeGenerate \
 			--runThreadN 5 \
 			--genomeDir {output} \
 			--genomeFastaFiles {input.fasta} \
 			--sjdbGTFfile {input.gff} \
 			--genomeSAindexNbases 10 \
-			--sjdbOverhang 100) 2>Benchmarks/Star/index_genome.txt
+			--sjdbOverhang 100
 		"""
 
 rule download_annotation:
 	output: file=config['gene_annotation_file']
 	params: url=config['gene_annotation_url']
+	benchmark:
+		"Benchmarks/download_annotation/genome_annotation.tsv"
 	shell:
 		"""
 		cd Genome
@@ -124,6 +103,8 @@ rule download_annotation:
 rule download_genome:
 	output: config['genome_fasta']
 	params: url=config['genome_url']
+	benchmark:
+		"Benchmarks/download_genome/genome_genome.tsv"
 	shell:
 		"""
 		cd Genome
@@ -143,6 +124,8 @@ rule align_one_sample:
 	input: r1="Samples/{srr}_1.fastq", r2="Samples/{srr}_2.fastq", genome_index=config['genome_index'], gene_annotation=config['gene_annotation_file']
 	output: bam="Alignments/{srr}.bam", counts="Alignments/{srr}.counts.txt", bai="Alignments/{srr}.bam.bai"
 	message: "Aligning {input.r1} and {input.r2} to {input.genome_index}."
+	benchmark:
+		"Benchmarks/align_one_sample/{srr}.tsv"
 	shell: """
 		module load star/2.7.1a samtools/1.5
 		srr=`basename {input.r1} _1.fastq`
@@ -170,9 +153,13 @@ rule align_one_sample:
 		rm -rf Alignments/{wildcards.srr}_STARtmp Alignments/{wildcards.srr}_STARgenome Alignments/{wildcards.srr}Log.progress.out
 		"""
 
-# This rule builds the sampledata.txt file, which is input for the differential expression analysis.
+# This rule builds the sampledata.txt file, which is input for the 
+# differential expression analysis, using information in the config file.
 rule make_sampledata_file:
-	input: "config.yaml"
+	#input: "config.yaml"
+	# The input is the config file. This variable is documented here:
+	# https://bitbucket.org/snakemake/snakemake/issues/594/retrieve-value-of-configfile-parameter-in
+	input: workflow.overwrite_configfile
 	output: filename="sampledata.txt"
 	message: "Making sample file {output.filename}."
 	run:
@@ -191,10 +178,13 @@ rule analysis_complete:
 rule differential_expression_analysis:
 	input: "all_samples_aligned.done", "sampledata.txt"
 	output: "deseq2_plots.pdf" ,"project_counts.txt", "project_results.txt"
+	params: basedir=workflow.basedir
 	message: "Performing differential expression analysis."
+	benchmark:
+		"Benchmarks/differential_expression_analysis/diff_expr_analysis.tsv"
 	shell: """
 		module load R/3.6.1
-		Rscript run_deseq2.r
+		Rscript {params.basedir}/run_deseq2.r
 		"""
 
 # This rule generates the data quality summary.
@@ -202,9 +192,11 @@ rule summarized_qc:
 	input: "raw_sample_qc.done", "all_samples_aligned.done"
 	output: touch("summarized_qc.done")
 	message: "Creating sample qc summary."
+	benchmark:
+		"Benchmarks/summarized_qc/summarized_qc.tsv"
 	shell: """
 		module load multiqc/1.5
-		time (multiqc .) 2>Benchmarks/Multiqc/multiqc.txt
+		multiqc .
 		"""
 
 # This rule runs FastQC on each sample's fastq file.
@@ -212,6 +204,8 @@ rule qc_one_sample:
 	input: r1="Samples/{srr}_1.fastq", r2="Samples/{srr}_2.fastq"
 	output: "FastQC/{srr}_1_fastqc.html", "FastQC/{srr}_1_fastqc.zip", "FastQC/{srr}_2_fastqc.html", "FastQC/{srr}_2_fastqc.zip"
 	message: "Checking quality of raw fastq data {input.r1} and {input.r2}."
+	benchmark:
+		"Benchmarks/qc_one_sample/{srr}.tsv"
 	shell: """
 		module load fastqc/0.11.4
 		mkdir -p FastQC
@@ -223,14 +217,6 @@ rule raw_sample_qc:
 	input: expand(["FastQC/{srr}_{end}_fastqc.{format}"], end=["1","2"], srr=SRRNumbers(config), format=["html","zip"])
 	output: touch("raw_sample_qc.done")
 	message: "Confirming all fastq files qc'd."
-
-# This is the top-level rule that drives the whole workflow.
-#rule completed_analysis:
-#	#input: "figure_generation.done", "summarized_qc.done"
-#	input: "summarized_qc.done", "differential_expression_analysis.done"
-#	message: "Confirming that analysis is complete."
-#	shell:
-#		"echo 'RNAseq workflow completed successfully!'"
 
 # This rule generates figures following the differential expression 
 # analysis.
