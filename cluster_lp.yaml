@@ -1,0 +1,13 @@
+# cluster.yaml - cluster configuration for Snakefile.rnaseq
+__default__:
+    cluster: lonepeak
+    partition: lonepeak-shared
+    account: chpc
+    time: 30:00
+    ntasks: 1
+
+download_one_sample:
+    ntasks: 2
+
+align_one_sample:
+    ntasks: 4
