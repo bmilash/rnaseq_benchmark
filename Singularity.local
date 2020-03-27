@@ -1,4 +1,5 @@
-# Singularity - singularity recipe for construction workflow container.
+# Singularity.local - singularity recipe for constructing workflow container. 
+# This workflow runs on the local node.
 Bootstrap:docker
 From:snakemake/snakemake
 
@@ -22,9 +23,6 @@ mv /config.yaml /cluster.yaml /Snakefile.container /run_deseq2.r /opt/workflow
 
 # Install other conda packages.
 /opt/conda/bin/conda create -n sra-tools_env -y -c bioconda -c conda-forge sra-tools=2.10.3-0
-#/opt/conda/bin/conda create -n sra-tools_env
-#/opt/conda/bin/conda install -n sra-tools_env -y -c conda-forge libxml2=2.9.10
-#/opt/conda/bin/conda install -n sra-tools_env -y -c bioconda sra-tools=2.10.3-0
 /opt/conda/bin/conda create -n star_env -y -c bioconda star samtools
 /opt/conda/bin/conda create -n fastqc_env -y -c bioconda fastqc
 /opt/conda/bin/conda create -n multiqc_env -y -c bioconda multiqc
@@ -34,6 +32,7 @@ mv /config.yaml /cluster.yaml /Snakefile.container /run_deseq2.r /opt/workflow
 ln -s /lib/x86_64-linux-gnu/libreadline.so.7 /lib/x86_64-linux-gnu/libreadline.so.6
 ln -s /lib/x86_64-linux-gnu/libncursesw.so.5.9 /lib/x86_64-linux-gnu/libncurses.so.5
 
+# Install R and its libraries.
 /opt/conda/bin/conda create -n r_env -y -c r r-base r-yaml r-ggplot2 
 /opt/conda/bin/conda install -n r_env -y -c conda-forge r-ggrepel
 /opt/conda/bin/conda install -n r_env -y -c bioconda bioconductor-deseq2
@@ -84,21 +83,6 @@ do
 		;;
 	esac
 done
-
-#echo "Generating directed acyclic graph diagram -> dag.png"
-#snakemake -s /opt/workflow/Snakefile.container --configfile $configfile --dag | dot -Tpng > dag.png
-
-#echo "Generating rule graph diagram -> rulegraph.png"
-#snakemake -s /opt/workflow/Snakefile.container --configfile $configfile --rulegraph | dot -Tpng > rulegraph.png
-
-# Run snakemake.
-#snakemake -s /opt/workflow/Snakefile.container \
-#	--cluster-config $clusterconfig \
-#	--configfile $configfile \
-#	--latency-wait 20 \
-#	--cluster "sbatch --clusters={cluster.cluster} --account={cluster.account} --partition={cluster.partition} $reservation --ntasks={cluster.ntasks} --time={cluster.time} -J '{rule}'" \
-#	--jobs 8 \
-#	$*
 
 snakemake -s /opt/workflow/Snakefile.container --configfile $configfile --jobs $concurrentjobs --latency-wait $latencywait $otherargs
 

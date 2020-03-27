@@ -31,11 +31,13 @@ rule all_done:
 	input: "differential_expression_analysis.done", "summarized_qc.done"
 
 rule download_one_sample:
+	container: "rnaseq_slurm.sif"
 	output: "Samples/{srr}_1.fastq", "Samples/{srr}_2.fastq"
 	benchmark: "Benchmarks/download_one_sample/{srr}.tsv"
 	shell:
 		"""
 		source activate sra-tools_env
+		mkdir -p Samples
 		cd Samples
 		fasterq-dump -p {wildcards.srr}
 		"""
@@ -43,6 +45,7 @@ rule download_one_sample:
 # This rule creates the genome index given the fasta file and gene annotation
 # file for the genome.
 rule index_genome:
+	container: "rnaseq_slurm.sif"
 	input: fasta=config['genome_fasta'], gff=config['gene_annotation_file']
 	output: directory(config['genome_index'])
 	message: "Building genome index {output}."
@@ -60,24 +63,28 @@ rule index_genome:
 		"""
 
 rule download_annotation:
+	container: "rnaseq_slurm.sif"
 	output: file=config['gene_annotation_file']
 	params: url=config['gene_annotation_url']
 	benchmark:
 		"Benchmarks/download_annotation/genome_annotation.tsv"
 	shell:
 		"""
+		mkdir -p Genome
 		cd Genome
 		wget {params.url}
 		gunzip `basename {params.url}`
 		"""
 
 rule download_genome:
+	container: "rnaseq_slurm.sif"
 	output: config['genome_fasta']
 	params: url=config['genome_url']
 	benchmark:
 		"Benchmarks/download_genome/genome_genome.tsv"
 	shell:
 		"""
+		mkdir -p Genome
 		cd Genome
 		wget {params.url}
 		gunzip `basename {params.url}`
@@ -92,6 +99,7 @@ rule align_all_samples:
 # fastq file isn't named with the sample name, so we can't use regular
 # wildcard expansion.
 rule align_one_sample:
+	container: "rnaseq_slurm.sif"
 	input: r1="Samples/{srr}_1.fastq", r2="Samples/{srr}_2.fastq", genome_index=config['genome_index'], gene_annotation=config['gene_annotation_file']
 	output: bam="Alignments/{srr}.bam", counts="Alignments/{srr}.counts.txt", bai="Alignments/{srr}.bam.bai"
 	message: "Aligning {input.r1} and {input.r2} to {input.genome_index}."
@@ -146,6 +154,7 @@ rule analysis_complete:
 
 # This rule performs the differential expression analysis following alignment.
 rule differential_expression_analysis:
+	container: "rnaseq_slurm.sif"
 	input: "all_samples_aligned.done", "sampledata.txt"
 	output: "deseq2_plots.pdf" ,"project_counts.txt", "project_results.txt"
 	params: basedir=workflow.basedir
@@ -162,6 +171,7 @@ rule differential_expression_analysis:
 
 # This rule generates the data quality summary.
 rule summarized_qc:
+	container: "rnaseq_slurm.sif"
 	input: "raw_sample_qc.done", "all_samples_aligned.done"
 	output: touch("summarized_qc.done")
 	message: "Creating sample qc summary."
@@ -173,6 +183,7 @@ rule summarized_qc:
 
 # This rule runs FastQC on each sample's fastq file.
 rule qc_one_sample:
+	container: "rnaseq_slurm.sif"
 	input: r1="Samples/{srr}_1.fastq", r2="Samples/{srr}_2.fastq"
 	output: "FastQC/{srr}_1_fastqc.html", "FastQC/{srr}_1_fastqc.zip", "FastQC/{srr}_2_fastqc.html", "FastQC/{srr}_2_fastqc.zip"
 	message: "Checking quality of raw fastq data {input.r1} and {input.r2}."

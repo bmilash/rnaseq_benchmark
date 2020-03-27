@@ -1,2 +1,5 @@
 .snakemake
 *.sif
+.cache
+.java
+sampledata.txt
