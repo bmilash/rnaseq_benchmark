@@ -113,10 +113,14 @@ else
 	reservation=""
 fi
 
+echo "Environment:"
+env
+
 snakemake -s /opt/workflow/Snakefile.container \
 	--use-singularity \
 	--configfile $configfile \
 	--cluster-config $clusterconfig \
+	--jobscript container_jobscript.sh \
 	--latency-wait $latencywait \
 	--cluster "sbatch --clusters={cluster.cluster} --account={cluster.account} --partition={cluster.partition} $reservation --ntasks={cluster.ntasks} --time={cluster.time} -J '{rule}'" \
 	--jobs $concurrentjobs \
