@@ -23,7 +23,10 @@ mv /config.yaml /cluster.yaml /Snakefile.container /run_deseq2.r /opt/workflow
 
 # Install other conda packages.
 /opt/conda/bin/conda create -n sra-tools_env -y -c bioconda -c conda-forge sra-tools=2.10.3-0
-/opt/conda/bin/conda create -n star_env -y -c bioconda star samtools
+/opt/conda/bin/conda create -n star_env -y -c bioconda star 
+# Need to downgrade openssl: 1.0 is required by samtools.
+# See https://github.com/bioconda/bioconda-recipes/issues/12100 .
+/opt/conda/bin/conda install -n star_env -y -c bioconda samtools openssl=1.0
 /opt/conda/bin/conda create -n fastqc_env -y -c bioconda fastqc
 /opt/conda/bin/conda create -n multiqc_env -y -c bioconda multiqc
 
