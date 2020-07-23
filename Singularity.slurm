@@ -54,7 +54,11 @@ useradd slurm
 %runscript
 if [ "$1" == "--help" ]
 then
-	echo 'Use: singularity run siffile [--configfile config_file] [--cluster-config cluster_config_file] [other_arguments_to_snakemake]'
+	echo "Use: singularity run siffile"
+	echo "Option arguments:"
+	echo "--configfile config_file"
+	echo "--cluster-config cluster_config_file"
+	echo "other_arguments_to_snakemake"
 	exit 0
 fi
 
