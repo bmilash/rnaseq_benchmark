@@ -17,12 +17,12 @@ def RequiredModules():
 	"""
 	Returns list of required module names.
 	"""
-	return [ "samtools/1.5", 
-		"multiqc/1.5", 
+	return [ "samtools/1.12", 
+		"multiqc/1.12", 
 		"fastqc/0.11.4", 
-		"star/2.7.1a", 
+		"star/2.7.8a", 
 		"sra-toolkit/2.10.0",
-		"R/3.6.1",
+		"R/4.1.3",
 	]
 
 def Samples(config):
@@ -77,7 +77,7 @@ rule index_genome:
 	benchmark:
 		"Benchmarks/index_genome/index_genome.tsv"
 	shell: """
-		module load star/2.7.1a
+		module load star/2.7.8a
 		mkdir -p {output}
 		STAR --runMode genomeGenerate \
 			--runThreadN 5 \
@@ -127,7 +127,7 @@ rule align_one_sample:
 	benchmark:
 		"Benchmarks/align_one_sample/{srr}.tsv"
 	shell: """
-		module load star/2.7.1a samtools/1.5
+		module load star/2.7.8a samtools/1.12
 		srr=`basename {input.r1} _1.fastq`
 		echo "Aligning {input.r1}, {input.r2}, sending output to {output.bam} and {output.counts}."
 		STAR --genomeDir {input.genome_index} \
@@ -159,7 +159,8 @@ rule make_sampledata_file:
 	#input: "config.yaml"
 	# The input is the config file. This variable is documented here:
 	# https://bitbucket.org/snakemake/snakemake/issues/594/retrieve-value-of-configfile-parameter-in
-	input: workflow.overwrite_configfile
+	#input: workflow.overwrite_configfile
+	#input: workflow.configfile
 	output: filename="sampledata.txt"
 	message: "Making sample file {output.filename}."
 	run:
@@ -167,8 +168,9 @@ rule make_sampledata_file:
 			# Write the table header.
 			ofs.write("\t".join(["Sample","Treatment","Time","SRRNumber"])+"\n")
 			# Write a row for each sample.
-			for sample in config['samples'].keys():
-				ofs.write("\t".join([sample,config['samples'][sample]['treatment'],config['samples'][sample]['time'],config['samples'][sample]['srrnumber']])+"\n")
+			#for sample in config['samples'].keys():
+			for sample in workflow.overwrite_config['samples'].keys():
+				ofs.write("\t".join([sample,workflow.overwrite_config['samples'][sample]['treatment'],workflow.overwrite_config['samples'][sample]['time'],workflow.overwrite_config['samples'][sample]['srrnumber']])+"\n")
 
 rule analysis_complete:
 	input: "deseq2_plots.pdf" ,"project_counts.txt", "project_results.txt"
@@ -183,7 +185,7 @@ rule differential_expression_analysis:
 	benchmark:
 		"Benchmarks/differential_expression_analysis/diff_expr_analysis.tsv"
 	shell: """
-		module load R/3.6.1
+		module load R/4.1.3
 		Rscript {params.basedir}/run_deseq2.r
 		"""
 
@@ -195,7 +197,7 @@ rule summarized_qc:
 	benchmark:
 		"Benchmarks/summarized_qc/summarized_qc.tsv"
 	shell: """
-		module load multiqc/1.5
+		module load multiqc/1.12
 		multiqc .
 		"""
 
