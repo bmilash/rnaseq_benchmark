@@ -20,7 +20,7 @@ def RequiredModules():
 	return [ "samtools/1.12", 
 		"multiqc/1.12", 
 		"fastqc/0.11.4", 
-		"star/2.7.8a", 
+		"star/2.7.10a", 
 		"sra-toolkit/2.10.0",
 		"R/4.1.3",
 	]
@@ -77,7 +77,7 @@ rule index_genome:
 	benchmark:
 		"Benchmarks/index_genome/index_genome.tsv"
 	shell: """
-		module load star/2.7.8a
+		module load star/2.7.10a
 		mkdir -p {output}
 		STAR --runMode genomeGenerate \
 			--runThreadN 5 \
@@ -127,7 +127,7 @@ rule align_one_sample:
 	benchmark:
 		"Benchmarks/align_one_sample/{srr}.tsv"
 	shell: """
-		module load star/2.7.8a samtools/1.12
+		module load star/2.7.10a samtools/1.12
 		srr=`basename {input.r1} _1.fastq`
 		echo "Aligning {input.r1}, {input.r2}, sending output to {output.bam} and {output.counts}."
 		STAR --genomeDir {input.genome_index} \
@@ -136,7 +136,8 @@ rule align_one_sample:
 			--quantMode GeneCounts \
 			--sjdbGTFfile {input.gene_annotation} \
 			--runThreadN 4 \
-			--clip3pAdapterSeq AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+			--clip3pAdapterSeq AGATCGGAAGAGCACACGTCTGAACTCCAGTCA AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+			--clip3pAdapterMMp 0.1 0.1 \
 			--outSAMtype BAM SortedByCoordinate \
 			--limitBAMsortRAM 2000000000 \
 			--outFilterScoreMinOverLread 0 \
@@ -155,12 +156,11 @@ rule align_one_sample:
 
 # This rule builds the sampledata.txt file, which is input for the 
 # differential expression analysis, using information in the config file.
+# The input to this rule should be the config file used for the workflow,
+# but that is difficult to get from the workflow object.
+# For now hardcoding this to "config.yaml".
 rule make_sampledata_file:
-	#input: "config.yaml"
-	# The input is the config file. This variable is documented here:
-	# https://bitbucket.org/snakemake/snakemake/issues/594/retrieve-value-of-configfile-parameter-in
-	#input: workflow.overwrite_configfile
-	#input: workflow.configfile
+	input: "config.yaml"
 	output: filename="sampledata.txt"
 	message: "Making sample file {output.filename}."
 	run:
@@ -168,7 +168,6 @@ rule make_sampledata_file:
 			# Write the table header.
 			ofs.write("\t".join(["Sample","Treatment","Time","SRRNumber"])+"\n")
 			# Write a row for each sample.
-			#for sample in config['samples'].keys():
 			for sample in workflow.overwrite_config['samples'].keys():
 				ofs.write("\t".join([sample,workflow.overwrite_config['samples'][sample]['treatment'],workflow.overwrite_config['samples'][sample]['time'],workflow.overwrite_config['samples'][sample]['srrnumber']])+"\n")
 
