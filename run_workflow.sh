@@ -83,11 +83,23 @@ export -f mysbatch
 which snakemake >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
+<<<<<<< HEAD
 	module load snakemake
 fi
 
 # Check if cluster config includes a reservation.
 grep reservation $clusterconfig > /dev/null
+=======
+	module load snakemake/6.4.1
+fi
+
+#configfile=$2
+configfile=config.yaml
+# Check if cluster config includes a reservation.
+#cluster_config=$4
+cluster_config=cluster.yaml
+grep reservation $cluster_config > /dev/null
+>>>>>>> adccc05135bda3fa78ce1a34dcc0a912b5a77fa1
 if [ $? = 0 ]
 then
 	reservation="--reservation={cluster.reservation}"
@@ -96,6 +108,7 @@ else
 fi
 
 # Run snakemake.
+<<<<<<< HEAD
 set -x
 snakemake -s $scriptdir/Snakefile.benchmark \
 	--cluster-config $clusterconfig \
@@ -112,3 +125,14 @@ then
 else
 	date +'Finished with error at %R.'
 fi
+=======
+snakemake -s $scriptdir/Snakefile.benchmark \
+	--cluster-config $cluster_config \
+	--configfile $configfile \
+	--latency-wait 20 \
+	--cluster "sbatch --clusters={cluster.cluster} --account={cluster.account} --partition={cluster.partition} $reservation --ntasks={cluster.ntasks} --time={cluster.time} -J '{rule}'" \
+	--jobs 8 \
+	$target
+
+date +'Finished at %R.'
+>>>>>>> adccc05135bda3fa78ce1a34dcc0a912b5a77fa1
