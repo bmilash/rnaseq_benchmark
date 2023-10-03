@@ -1,13 +1,32 @@
 # cluster.yaml - cluster configuration for Snakefile.rnaseq
 __default__:
-    cluster: notchpeak
-    partition: notchpeak-shared
+    cluster: kingspeak
+    partition: kingspeak-shared
     account: chpc
-    time: 30:00
+    time: 00:30:00
     ntasks: 1
+    reservation: Jul11_Downtime
 
 download_one_sample:
-    ntasks: 2
+    cluster: kingspeak
+    partition: kingspeak-shared
+    account: chpc
+    time: 00:30:00
+    ntasks: 4
 
 align_one_sample:
     ntasks: 4
+
+#download_annotation:
+#    cluster: kingspeak
+#    partition: kingspeak-dtn
+#    account: dtn
+#    time: 00:30:00
+#    ntasks: 4
+#
+#download_genome:
+#    cluster: kingspeak
+#    partition: kingspeak-dtn
+#    account: dtn
+#    time: 00:30:00
+#    ntasks: 4
