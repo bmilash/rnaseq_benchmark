@@ -18,6 +18,7 @@ Runs the workflow on current cluster using no reservation.
 ./run_workflow.sh --cluster clustername
 ```
 Runs the workflow on named cluster using no reservation.
+```
 ./run_workflow.sh --reservation reservationname
 ```
 Runs workflow on current cluster under the named reservation.
