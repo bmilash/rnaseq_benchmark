@@ -1,0 +1,32 @@
+# cluster.yaml - cluster configuration for Snakefile.rnaseq
+__default__:
+    cluster: redwood
+    partition: redwood-shared
+    account: chpc
+    time: 00:05:00
+    ntasks: 1
+    memory: 10G
+
+download_one_sample:
+    cluster: redwood
+    partition: redwood-dtn
+    account: dtn
+    time: 00:05:00
+    ntasks: 1
+
+align_one_sample:
+    ntasks: 4
+
+download_annotation:
+    cluster: redwood
+    partition: redwood-dtn
+    account: dtn
+    time: 00:05:00
+    ntasks: 1
+
+download_genome:
+    cluster: redwood
+    partition: redwood-dtn
+    account: dtn
+    time: 00:05:00
+    ntasks: 1

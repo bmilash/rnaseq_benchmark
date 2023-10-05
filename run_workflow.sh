@@ -67,7 +67,7 @@ done
 
 if [ -z "$clustername" ]
 then
-	clustername=$(basename $UUFSCELL .peaks)
+	clustername=$(echo $UUFSCELL | cut -d . -f 1)
 fi
 clusterconfig="ClusterConfigs/"$clustername".yaml"
 
