@@ -233,4 +233,4 @@ rule raw_sample_qc:
 
 # This rule cleans up the output from all the other rules.
 rule clean:
-	shell: "rm -rf Alignments Samples Genome Benchmarks Log.out FastQC deseq2_plots.pdf project_counts.txt project_results.txt sampledata.txt all_samples_aligned.done raw_sample_qc.done differential_expression_analysis.done summarized_qc.done multiqc_data* multiqc_report*.html slurm-*.out"
+	shell: "rm -rf Alignments _STARtmp Samples Genome Benchmarks Log.out FastQC deseq2_plots.pdf project_counts.txt project_results.txt sampledata.txt all_samples_aligned.done raw_sample_qc.done differential_expression_analysis.done summarized_qc.done multiqc_data* multiqc_report*.html slurm-*.out"
