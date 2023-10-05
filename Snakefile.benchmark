@@ -127,7 +127,7 @@ rule align_one_sample:
 	benchmark:
 		"Benchmarks/align_one_sample/{srr}.tsv"
 	shell: """
-		module load star/2.7.1a samtools/1.16
+		module load star/2.7.10a samtools/1.16
 		srr=`basename {input.r1} _1.fastq`
 		echo "Aligning {input.r1}, {input.r2}, sending output to {output.bam} and {output.counts}."
 		STAR --genomeDir {input.genome_index} \
