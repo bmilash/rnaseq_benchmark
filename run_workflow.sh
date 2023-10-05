@@ -24,7 +24,8 @@ while [ -n "$1" ]
 do
 	if [ $1 = "-h" ]
 	then
-		echo "Use: $0 [ --configfile config.yaml] [--cluster cluster.yaml] [additional optional args]"
+		echo "Use: $0 [--cluster clustername] [ --configfile config.yaml] [additional optional args]"
+		echo "clustername defaults to current cluster"
 		exit 1
 	fi
 	if [ $1 = "--configfile" ]
@@ -44,7 +45,7 @@ do
 	if [ $1 = "--cluster" ]
 	then
 		shift
-		clusterconfig=$1
+		clustername=$1
 		shift
 		continue
 	fi
@@ -56,8 +57,21 @@ do
 	shift
 done
 
-echo "configfile: $configfile"
+if [ -z "$clustername" ]
+then
+	clustername=$(basename $UUFSCELL .peaks)
+fi
+clusterconfig="ClusterConfigs/"$clustername".yaml"
+
+if [ ! -f $clusterconfig ]
+then
+	echo "Problem: cluster configuration file $clusterconfig not found."
+	exit 1
+fi
+
+echo "clustername: $clustername"
 echo "clusterconfig: $clusterconfig"
+echo "configfile: $configfile"
 echo "otherargs: $otherargs"
 
 # Function to wrap sbatch.

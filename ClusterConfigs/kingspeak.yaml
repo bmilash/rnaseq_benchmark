@@ -1,0 +1,13 @@
+# kingspeak.yaml - cluster configuration for Snakefile.rnaseq
+__default__:
+    cluster: kingspeak
+    partition: kingspeak-shared
+    account: chpc
+    time: 00:30:00
+    ntasks: 1
+
+download_one_sample:
+    ntasks: 2
+
+align_one_sample:
+    ntasks: 4
