@@ -18,13 +18,14 @@ configfile=$scriptdir"/config.yaml"
 # Default cluster configuration:
 clusterconfig=$scriptdir/"cluster.yaml"
 otherargs=""
+reservation=""
 
 # Process command line arguments.
 while [ -n "$1" ]
 do
 	if [ $1 = "-h" ]
 	then
-		echo "Use: $0 [--cluster clustername] [ --configfile config.yaml] [additional optional args]"
+		echo "Use: $0 [--cluster clustername] [--reservation reservationname] [--configfile config.yaml] [additional optional args]"
 		echo "clustername defaults to current cluster"
 		exit 1
 	fi
@@ -32,6 +33,13 @@ do
 	then
 		shift
 		configfile=$1
+		shift
+		continue
+	fi
+	if [ $1 = "--reservation" ]
+	then
+		shift
+		reservationname=$1
 		shift
 		continue
 	fi
@@ -100,12 +108,9 @@ then
 	module load snakemake
 fi
 
-# Check if cluster config includes a reservation.
-#grep reservation $clusterconfig > /dev/null
-cat $clusterconfig | sed -e 's/#.*$//' | grep reservation > /dev/null
-if [ $? = 0 ]
+if [ -n "$reservationname" ]
 then
-	reservation="--reservation={cluster.reservation}"
+	reservation="--reservation=$reservationname"
 else
 	reservation=""
 fi

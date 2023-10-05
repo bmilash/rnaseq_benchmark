@@ -5,6 +5,7 @@ __default__:
     account: chpc
     time: 00:30:00
     ntasks: 1
+    memory: 10G
 
 download_one_sample:
     ntasks: 2
