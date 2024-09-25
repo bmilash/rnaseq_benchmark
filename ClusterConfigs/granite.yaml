@@ -1,0 +1,32 @@
+# cluster.yaml - cluster configuration for Snakefile.rnaseq
+__default__:
+    cluster: granite
+    partition: granite
+    account: chpc
+    time: 00:05:00
+    ntasks: 1
+    memory: 10G
+
+download_one_sample:
+    cluster: granite
+    partition: granite
+    account: chpc
+    time: 00:05:00
+    ntasks: 1
+
+align_one_sample:
+    ntasks: 4
+
+download_annotation:
+    cluster: granite
+    partition: granite
+    account: chcp
+    time: 00:05:00
+    ntasks: 1
+
+download_genome:
+    cluster: granite
+    partition: granite
+    account: chpc
+    time: 00:05:00
+    ntasks: 1
