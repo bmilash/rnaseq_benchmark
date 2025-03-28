@@ -2,6 +2,7 @@
 __default__:
     cluster: kingspeak
     partition: kingspeak-shared
+    qos: kingspeak
     account: chpc
     time: 00:30:00
     ntasks: 1

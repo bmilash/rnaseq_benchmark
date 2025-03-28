@@ -2,6 +2,7 @@
 __default__:
     cluster: lonepeak
     partition: lonepeak-shared
+    qos: lonepeak
     account: chpc
     time: 00:10:00
     ntasks: 1

@@ -2,6 +2,7 @@
 __default__:
     cluster: scrubpeak
     partition: scrubpeak-shared
+    qos: scrubpeak
     account: chpc
     time: 00:10:00
     ntasks: 1

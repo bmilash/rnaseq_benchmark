@@ -3,6 +3,7 @@ __default__:
     cluster: crystalpeak
     partition: crystalpeak-shared
     account: chpc
+    qos: crystalpeak
     time: 00:10:00
     ntasks: 1
     memory: 10G

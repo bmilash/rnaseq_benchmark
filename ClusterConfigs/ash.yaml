@@ -1,9 +1,0 @@
-# cluster.yaml - cluster configuration for Snakefile.rnaseq
-__default__:
-    cluster: ash
-    partition: ash-guest
-    account: smithp-guest
-    time: 00:05:00
-    ntasks: 1
-    memory: 10G
-

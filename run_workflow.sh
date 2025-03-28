@@ -3,11 +3,6 @@
 # This script is designed to be executed by hand or within the 
 # container, not as a standalone SLURM script.
 #
-# Use:
-# sh run_workflow.sh [ --configfile config.yaml] [--cluster cluster.yaml] [additional optional args]
-
-date +'Starting at %R.'
-echo "Running on $HOSTNAME"
 
 # Find location of this script - that will be the location of the snakefile.
 scriptdir=`dirname $0`
@@ -16,7 +11,7 @@ numjobs=40
 # Default configuration file for all but cluster configuration:
 configfile=$scriptdir"/config.yaml"
 # Default cluster configuration:
-clusterconfig=$scriptdir/"cluster.yaml"
+clustername=$(echo $UUFSCELL | cut -d . -f 1)
 otherargs=""
 reservation=""
 
@@ -25,8 +20,9 @@ while [ -n "$1" ]
 do
 	if [ $1 = "-h" ]
 	then
-		echo "Use: $0 [--cluster clustername] [--reservation reservationname] [--configfile config.yaml] [additional optional args]"
-		echo "clustername defaults to current cluster"
+		echo "Use: $0 [--cluster clustername] [--reservation reservationname] [--configfile config.yaml] [--jobs numjobs] [additional optional args]"
+		echo 'clustername defaults to current cluster (defined by $UUFSCELL variable)'
+		echo "number of concurrent jobs defaults to $numjobs"
 		exit 1
 	fi
 	if [ $1 = "--configfile" ]
@@ -65,10 +61,9 @@ do
 	shift
 done
 
-if [ -z "$clustername" ]
-then
-	clustername=$(echo $UUFSCELL | cut -d . -f 1)
-fi
+date +'Starting at %R.'
+echo "Running on $HOSTNAME"
+
 clusterconfig="ClusterConfigs/"$clustername".yaml"
 
 if [ ! -f $clusterconfig ]
@@ -88,6 +83,8 @@ function mysbatch () {
 	shift
 	partition=$1
 	shift
+	qos=$1
+	shift
 	account=$1
 	shift
 	rule=$1
@@ -96,7 +93,7 @@ function mysbatch () {
 	shift
 	memory=$1
 	shift
-	sbatch -M $cluster -p $partition -A $account -J $rule --time=$runtime --mem=$memory $* | cut -d' ' -f4
+	sbatch -M $cluster -p $partition -q $qos -A $account -J $rule --time=$runtime --mem=$memory $* | cut -d' ' -f4
 }
 
 export -f mysbatch
@@ -121,7 +118,7 @@ snakemake -s $scriptdir/Snakefile.benchmark \
 	--cluster-config $clusterconfig \
 	--configfile $configfile \
 	--latency-wait 60 \
-	--cluster "mysbatch {cluster.cluster} {cluster.partition} {cluster.account} {rule} {cluster.time} {cluster.memory} $reservation" \
+	--cluster "mysbatch {cluster.cluster} {cluster.partition} {cluster.qos} {cluster.account} {rule} {cluster.time} {cluster.memory} $reservation" \
 	--cluster-cancel scancel \
 	--jobs $numjobs \
 	$otherargs
