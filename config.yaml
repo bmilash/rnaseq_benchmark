@@ -18,7 +18,7 @@ genome_index: Genome/yeast/star100
 description: >
     GSE129319: UV laser-induced, time-resolved transcriptome resonses of Saccharomyces cerevisiae
 
-# Values for differential expression analysis:
+# Values for differential expression analysis. Used in run_deseq.r:
 factorname: "Treatment"
 numerator: "laser"
 denominator: "control"

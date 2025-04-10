@@ -1,0 +1,18 @@
+# config.v9+.yaml - configuration file for rnaseq-benchmark workflow
+# using snakemake version 9.
+
+executor: slurm
+jobs: 5
+
+default-resources:
+    mem_mb: 10000
+    account: chpc
+    cluster: lonepeak
+    partition: lonepeak-shared
+    qos: lonepeak
+    runtime: '10 m'
+
+set-threads:
+    download_one_sample: 2
+    align_one_sample: 4
+

@@ -102,7 +102,7 @@ export -f mysbatch
 which snakemake >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
-	module load snakemake
+	module load snakemake/9.1.9
 fi
 
 if [ -n "$reservationname" ]
@@ -114,14 +114,18 @@ fi
 
 # Run snakemake.
 set -x
-snakemake -s $scriptdir/Snakefile.benchmark \
-	--cluster-config $clusterconfig \
-	--configfile $configfile \
-	--latency-wait 60 \
-	--cluster "mysbatch {cluster.cluster} {cluster.partition} {cluster.qos} {cluster.account} {rule} {cluster.time} {cluster.memory} $reservation" \
-	--cluster-cancel scancel \
-	--jobs $numjobs \
-	$otherargs
+#snakemake -s $scriptdir/Snakefile.benchmark \
+#	--cluster-config $clusterconfig \
+#	--configfile $configfile \
+#	--latency-wait 60 \
+#	--cluster "mysbatch {cluster.cluster} {cluster.partition} {cluster.qos} {cluster.account} {rule} {cluster.time} {cluster.memory} $reservation" \
+#	--cluster-cancel scancel \
+#	--jobs $numjobs \
+#	$otherargs
+
+snakemake --snakefile $scriptdir/Snakefile.benchmark \
+	--workflow-profile $scriptdir/profiles \
+	--configfile $configfile
 
 if [ $? -eq 0 ]
 then
