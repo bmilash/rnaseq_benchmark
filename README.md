@@ -8,6 +8,11 @@ We are using this workflow to exercise our SLURM clusters following a maintenanc
 downtime, and this is not intended as a proper modern way to process RNAseq gene
 expression data.
 
+To do:
+* DONE port to snakemake v. 9. 
+* enable use of a reservation
+* enable use of DTNs
+
 Use:
 
 ```
