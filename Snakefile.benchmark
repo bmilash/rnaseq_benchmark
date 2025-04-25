@@ -107,9 +107,10 @@ rule download_genome:
 		"Benchmarks/download_genome/genome_genome.tsv"
 	shell:
 		"""
+		mkdir -p Genome
 		cd Genome
 		wget {params.url}
-		gunzip `basename {params.url}`
+		gunzip $(basename {params.url})
 		"""
 
 rule align_all_samples:

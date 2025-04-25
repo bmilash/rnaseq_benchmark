@@ -124,8 +124,8 @@ set -x
 #	$otherargs
 
 snakemake --snakefile $scriptdir/Snakefile.benchmark \
-	--workflow-profile $scriptdir/profiles/$clustername \
 	--configfile $configfile \
+	--workflow-profile $scriptdir/profiles/$clustername \
 	$otherargs
 
 if [ $? -eq 0 ]

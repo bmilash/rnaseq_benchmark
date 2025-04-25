@@ -20,9 +20,8 @@ set-resources:
     download_one_sample:
         cluster: notchpeak
         partition: notchpeak-dtn
-        qos: notchpeak-dtn
-        account: dtn
-        time: 00:05:00
+        slurm: "'--qos=notchpeak-dtn --account=dtn'"
+        runtime: '5 m'
         ntasks: 1
 
     align_one_sample:
@@ -31,15 +30,13 @@ set-resources:
     download_annotation:
         cluster: notchpeak
         partition: notchpeak-dtn
-        qos: notchpeak-dtn
-        account: dtn
-        time: 00:05:00
+        slurm: "'--qos=notchpeak-dtn --account=dtn'"
+        runtime: '5 m'
         ntasks: 1
     
     download_genome:
         cluster: notchpeak
         partition: notchpeak-dtn
-        qos: notchpeak-dtn
-        account: dtn
-        time: 00:05:00
+        slurm: "'--qos=notchpeak-dtn --account=dtn'"
+        runtime: '5 m'
         ntasks: 1
