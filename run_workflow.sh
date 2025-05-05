@@ -102,7 +102,7 @@ export -f mysbatch
 which snakemake >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
-	module load snakemake/9.1.9
+	module load snakemake/9.3.3
 fi
 
 if [ -n "$reservationname" ]
@@ -114,6 +114,7 @@ fi
 
 # Run snakemake.
 set -x
+# For snakemake version 7 or less:
 #snakemake -s $scriptdir/Snakefile.benchmark \
 #	--cluster-config $clusterconfig \
 #	--configfile $configfile \
@@ -123,6 +124,7 @@ set -x
 #	--jobs $numjobs \
 #	$otherargs
 
+# For snakemake version 8 or greater:
 snakemake --snakefile $scriptdir/Snakefile.benchmark \
 	--configfile $configfile \
 	--workflow-profile $scriptdir/profiles/$clustername \

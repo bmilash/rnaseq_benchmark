@@ -2,14 +2,14 @@
 # using snakemake version 9.
 
 executor: slurm
-jobs: 5
+jobs: 20
 
 default-resources:
     mem_mb: 10000
-    account: chpc
-    cluster: notchpeak
-    partition: notchpeak-shared
-    qos: notchpeak
+    slurm_account: chpc
+    slurm_cluster: notchpeak
+    slurm_partition: notchpeak-shared
+    slurm_qos: notchpeak
     runtime: '10 m'
 
 set-threads:
@@ -18,9 +18,9 @@ set-threads:
 
 set-resources:
     download_one_sample:
-        cluster: notchpeak
-        partition: notchpeak-dtn
-        slurm: "'--qos=notchpeak-dtn --account=dtn'"
+        slurm_partition: notchpeak-dtn
+        slurm_account: dtn
+        slurm_qos: notchpeak-dtn
         runtime: '5 m'
         ntasks: 1
 
@@ -28,15 +28,16 @@ set-resources:
         ntasks: 4
     
     download_annotation:
-        cluster: notchpeak
-        partition: notchpeak-dtn
-        slurm: "'--qos=notchpeak-dtn --account=dtn'"
+        slurm_partition: notchpeak-dtn
+        slurm_account: dtn
+        slurm_qos: notchpeak-dtn
         runtime: '5 m'
         ntasks: 1
     
     download_genome:
-        cluster: notchpeak
-        partition: notchpeak-dtn
-        slurm: "'--qos=notchpeak-dtn --account=dtn'"
+        slurm_partition: notchpeak-dtn
+        slurm_account: dtn
+        slurm_qos: notchpeak-dtn
+        slurm_name: download_genome
         runtime: '5 m'
         ntasks: 1

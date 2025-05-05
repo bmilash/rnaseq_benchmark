@@ -13,6 +13,19 @@ import subprocess
 # These rules should be executed on the host machine, not on the cluster:
 localrules: all_done, make_sampledata_file, clean, analysis_complete, raw_sample_qc, align_all_samples
 
+def ReadConfig():
+	"""
+	Reads configuration info from config.yaml
+	"""
+	from yaml import load
+	try:
+		from yaml import CLoader as Loader
+	except ImportError:
+		from yaml import Loader
+
+	with open("config.yaml") as ifs:
+		return(load(ifs,Loader))
+
 def RequiredModules():
 	"""
 	Returns list of required module names.
@@ -43,8 +56,6 @@ onstart:
 	try:
 		# Check for required software modules.
 		shell("module load "+" ".join(RequiredModules()))
-
-		shell("mkdir -p Alignments Samples")
 	except subprocess.CalledProcessError:
 		print("One or more required modules missing.")
 		sys.exit(1)
@@ -52,7 +63,7 @@ onstart:
 		print(e)
 		sys.exit(1)
 	else:
-		print("Pre-flight checks OK!")
+		print("All required modules present!")
 
 rule all_done:
 	input: "differential_expression_analysis.done", "summarized_qc.done"
@@ -63,6 +74,7 @@ rule download_one_sample:
 		"Benchmarks/download_one_sample/{srr}.tsv"
 	shell:
 		"""
+		mkdir -p Samples
 		module load sra-toolkit/2.10.0
 		cd Samples
 		fasterq-dump -p {wildcards.srr}
@@ -95,6 +107,7 @@ rule download_annotation:
 		"Benchmarks/download_annotation/genome_annotation.tsv"
 	shell:
 		"""
+		mkdir -p Genome
 		cd Genome
 		wget {params.url}
 		gunzip `basename {params.url}`
@@ -128,6 +141,7 @@ rule align_one_sample:
 	benchmark:
 		"Benchmarks/align_one_sample/{srr}.tsv"
 	shell: """
+		mkdir -p Alignments
 		module load star/2.7.11b samtools/1.16
 		srr=`basename {input.r1} _1.fastq`
 		echo "Aligning {input.r1}, {input.r2}, sending output to {output.bam} and {output.counts}."
@@ -164,7 +178,7 @@ rule make_sampledata_file:
 	input: "config.yaml"
 	# The input is the config file. This variable is documented here:
 	# https://bitbucket.org/snakemake/snakemake/issues/594/retrieve-value-of-configfile-parameter-in
-	#input: workflow.overwrite_configfile
+	#input: workflow_configfile
 	#input: workflow.configfile
 	output: filename="sampledata.txt"
 	message: "Making sample file {output.filename}."
@@ -173,8 +187,9 @@ rule make_sampledata_file:
 			# Write the table header.
 			ofs.write("\t".join(["Sample","Treatment","Time","SRRNumber"])+"\n")
 			# Write a row for each sample.
-			for sample in workflow.overwrite_config['samples'].keys():
-				ofs.write("\t".join([sample,workflow.overwrite_config['samples'][sample]['treatment'],workflow.overwrite_config['samples'][sample]['time'],workflow.overwrite_config['samples'][sample]['srrnumber']])+"\n")
+			workflow_config = ReadConfig()
+			for sample in workflow_config['samples'].keys():
+				ofs.write("\t".join([sample,workflow_config['samples'][sample]['treatment'],workflow_config['samples'][sample]['time'],workflow_config['samples'][sample]['srrnumber']])+"\n")
 
 rule analysis_complete:
 	input: "deseq2_plots.pdf" ,"project_counts.txt", "project_results.txt"
