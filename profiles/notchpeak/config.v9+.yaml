@@ -7,9 +7,9 @@ jobs: 20
 default-resources:
     mem_mb: 10000
     slurm_account: chpc
-    slurm_cluster: notchpeak
+    clusters: notchpeak
     slurm_partition: notchpeak-shared
-    slurm_qos: notchpeak
+    qos: notchpeak
     runtime: '10 m'
 
 set-threads:
@@ -20,7 +20,7 @@ set-resources:
     download_one_sample:
         slurm_partition: notchpeak-dtn
         slurm_account: dtn
-        slurm_qos: notchpeak-dtn
+        qos: notchpeak-dtn
         runtime: '5 m'
         ntasks: 1
 
@@ -30,14 +30,14 @@ set-resources:
     download_annotation:
         slurm_partition: notchpeak-dtn
         slurm_account: dtn
-        slurm_qos: notchpeak-dtn
+        qos: notchpeak-dtn
         runtime: '5 m'
         ntasks: 1
     
     download_genome:
         slurm_partition: notchpeak-dtn
         slurm_account: dtn
-        slurm_qos: notchpeak-dtn
+        qos: notchpeak-dtn
         slurm_name: download_genome
         runtime: '5 m'
         ntasks: 1

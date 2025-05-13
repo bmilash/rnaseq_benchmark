@@ -2,13 +2,13 @@
 # using snakemake version 9.
 
 executor: slurm
-jobs: 5
+jobs: 20
 
 default-resources:
     mem_mb: 10000
-    account: chpc
-    cluster: lonepeak
-    partition: lonepeak-shared
+    slurm_account: chpc
+    clusters: lonepeak
+    slurm_partition: lonepeak-shared
     qos: lonepeak
     runtime: '10 m'
 

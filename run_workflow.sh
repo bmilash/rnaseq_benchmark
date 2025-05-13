@@ -7,7 +7,7 @@
 # Find location of this script - that will be the location of the snakefile.
 scriptdir=`dirname $0`
 # Default number of concurrent jobs:
-numjobs=40
+#numjobs=40
 # Default configuration file for all but cluster configuration:
 configfile=$scriptdir"/config.yaml"
 # Default cluster configuration:
@@ -20,9 +20,9 @@ while [ -n "$1" ]
 do
 	if [ $1 = "-h" ]
 	then
-		echo "Use: $0 [--cluster clustername] [--reservation reservationname] [--configfile config.yaml] [--jobs numjobs] [additional optional args]"
+		echo "Use: $0 [--cluster clustername] [--reservation reservationname] [additional optional args]"
 		echo 'clustername defaults to current cluster (defined by $UUFSCELL variable)'
-		echo "number of concurrent jobs defaults to $numjobs"
+		echo "number of concurrent jobs defined in workflow profile for cluster"
 		exit 1
 	fi
 	if [ $1 = "--configfile" ]
@@ -39,13 +39,13 @@ do
 		shift
 		continue
 	fi
-	if [ $1 = "--jobs" ]
-	then
-		shift
-		numjobs=$1
-		shift
-		continue
-	fi
+	#if [ $1 = "--jobs" ]
+	#then
+	#	shift
+	#	numjobs=$1
+	#	shift
+	#	continue
+	#fi
 	if [ $1 = "--cluster" ]
 	then
 		shift
@@ -107,27 +107,18 @@ fi
 
 if [ -n "$reservationname" ]
 then
-	reservation="--reservation=$reservationname"
+	reservation="--default-resources reservation=$reservationname"
 else
 	reservation=""
 fi
 
-# Run snakemake.
 set -x
-# For snakemake version 7 or less:
-#snakemake -s $scriptdir/Snakefile.benchmark \
-#	--cluster-config $clusterconfig \
-#	--configfile $configfile \
-#	--latency-wait 60 \
-#	--cluster "mysbatch {cluster.cluster} {cluster.partition} {cluster.qos} {cluster.account} {rule} {cluster.time} {cluster.memory} $reservation" \
-#	--cluster-cancel scancel \
-#	--jobs $numjobs \
-#	$otherargs
 
 # For snakemake version 8 or greater:
 snakemake --snakefile $scriptdir/Snakefile.benchmark \
 	--configfile $configfile \
 	--workflow-profile $scriptdir/profiles/$clustername \
+	$reservation \
 	$otherargs
 
 if [ $? -eq 0 ]

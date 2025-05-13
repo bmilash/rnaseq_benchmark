@@ -2,13 +2,13 @@
 # using snakemake version 9.
 
 executor: slurm
-jobs: 5
+jobs: 20
 
 default-resources:
     mem_mb: 10000
-    account: chpc
-    cluster: scrubpeak
-    partition: scrubpeak-shared
+    slurm_account: chpc
+    clusters: scrubpeak
+    slurm_partition: scrubpeak-shared
     qos: scrubpeak
     runtime: '10 m'
 

@@ -7,9 +7,9 @@ jobs: 20
 default-resources:
     mem_mb: 10000
     slurm_account: chpc
-    clusters: kingspeak
-    slurm_partition: kingspeak-shared
-    qos: kingspeak
+    clusters: crystalpeak
+    slurm_partition: crystalpeak-shared
+    qos: crystalpeak
     runtime: '10 m'
 
 set-threads:

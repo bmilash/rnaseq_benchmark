@@ -2,13 +2,13 @@
 # using snakemake version 9.
 
 executor: slurm
-jobs: 5
+jobs: 20
 
 default-resources:
     mem_mb: 10000
-    account: chpc
-    cluster: granite
-    partition: granite
+    slurm_account: chpc
+    clusters: granite
+    slurm_partition: granite
     qos: granite
     runtime: '10 m'
 
